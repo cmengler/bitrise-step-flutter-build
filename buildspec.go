@@ -37,8 +37,10 @@ func (spec buildSpecification) exportArtifacts(artifacts []string) error {
 		return spec.exportAndroidArtifacts(AppBundle, artifacts, deployDir)
 	case "ios":
 		return spec.exportIOSApp(artifacts, deployDir)
+	case "web":
+		return spec.exportWebApp(artifacts, deployDir)
 	default:
-		return fmt.Errorf("unsupported platform for exporting artifacts: %s. Supported platforms: apk, appbundle, ios", spec.platformCmdFlag)
+		return fmt.Errorf("unsupported platform for exporting artifacts: %s. Supported platforms: apk, appbundle, ios, web", spec.platformCmdFlag)
 	}
 }
 
@@ -139,6 +141,26 @@ func filterAndroidArtifactsBy(androidOutputType AndroidArtifactType, artifacts [
 		index++
 	}
 	return artifacts[:index]
+}
+
+func (spec buildSpecification) exportWebApp(artifacts []string, deployDir string) error {
+	if len(artifacts) < 1 {
+		return fmt.Errorf("- No artifacts found")
+	}
+
+	artifact := artifacts[len(artifacts)-1]
+	baseDir := filepath.Dir(artifact)
+
+	if len(artifacts) > 1 {
+		log.Warnf("- Multiple artifacts found: %v, exporting %s", artifacts, artifact)
+	}
+
+	if err := ziputil.ZipDir(baseDir, filepath.Join(deployDir, "web.zip"), true); err != nil {
+		return err
+	}
+	log.Donef("- $BITRISE_DEPLOY_DIR/web.zip")
+
+	return nil
 }
 
 func (spec buildSpecification) buildable(platform string) bool {

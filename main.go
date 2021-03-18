@@ -36,7 +36,7 @@ var errCodeSign = errors.New("CODESIGN")
 type config struct {
 	IOSAdditionalParams     string              `env:"ios_additional_params"`
 	AndroidAdditionalParams string              `env:"android_additional_params"`
-	Platform                string              `env:"platform,opt[both,ios,android]"`
+	Platform                string              `env:"platform,opt[both,ios,android,web]"`
 	IOSExportPattern        string              `env:"ios_output_pattern,required"`
 	AndroidOutputType       AndroidArtifactType `env:"android_output_type,opt[apk,appbundle]"`
 	AndroidExportPattern    string              `env:"android_output_pattern,required"`
@@ -44,6 +44,8 @@ type config struct {
 	ProjectLocation         string              `env:"project_location,dir"`
 	DebugMode               bool                `env:"is_debug_mode,opt[true,false]"`
 	CacheLevel              string              `env:"cache_level,opt[all,none]"`
+	WebAdditionalParams     string              `env:"web_additional_params"`
+	WebExportPattern        string              `env:"web_output_pattern,required"`
 
 	// Deprecated
 	AndroidBundleExportPattern string `env:"android_bundle_output_pattern"`
@@ -175,6 +177,13 @@ build:
 			outputPathPatterns:   strings.Split(cfg.AndroidExportPattern, "\n"),
 			additionalParameters: cfg.AndroidAdditionalParams,
 		},
+		{
+			displayName:          "Web",
+			platformCmdFlag:      "web",
+			platformSelectors:    []string{"both", "web"},
+			outputPathPatterns:   strings.Split(cfg.WebExportPattern, "\n"),
+			additionalParameters: cfg.WebAdditionalParams,
+		},
 	} {
 		if !spec.buildable(cfg.Platform) {
 			continue
@@ -202,7 +211,7 @@ build:
 		var artifacts []string
 		var err error
 
-		if spec.platformCmdFlag == "apk" || spec.platformCmdFlag == "appbundle" {
+		if spec.platformCmdFlag == "apk" || spec.platformCmdFlag == "appbundle" || spec.platformCmdFlag == "web" {
 			artifacts, err = spec.artifactPaths(spec.outputPathPatterns, false)
 		} else {
 			artifacts, err = spec.artifactPaths(spec.outputPathPatterns, true)
@@ -214,7 +223,7 @@ build:
 
 		if len(artifacts) < 1 {
 			failf(`Artifact path pattern (%s) did not match any artifacts on the path (%s).
-Check that 'iOS/Android Output Pattern' and 'Project Location' is correct.`, spec.outputPathPatterns, spec.projectLocation)
+Check that 'iOS/Android/Web Output Pattern' and 'Project Location' is correct.`, spec.outputPathPatterns, spec.projectLocation)
 		}
 
 		if err := spec.exportArtifacts(artifacts); err != nil {

@@ -24,6 +24,11 @@ description: |-
   4. Append any flag to the `build` command in the **Additional parameters** input.
   5. Leave the **Output pattern** input's default value as is or modify it to the pattern if your build artifacts are stored elsewhere.
 
+  #### Configuring for a Web app
+  1. Make sure the **Platform input** is set to `Web` or `both`.
+  2. Append any flag to the `build` command in the **Additional parameters** input.
+  3. Leave the **Output pattern** input's default value as is or modify it to the pattern if your build artifacts are stored elsewhere.
+
   ### Troubleshooting
 
   Make sure the **Flutter Install** Step is before the **Flutter Build** Step.
@@ -66,13 +71,14 @@ inputs:
   - platform: both
     opts:
       title: "Platform"
-      summary: "The selected platform will be built, or both iOS and Android if you select both"
-      description: "The selected platform will be built, or both iOs and Android if you select both"
+      summary: "The selected platform will be built, or both iOS, Android and Web if you select both"
+      description: "The selected platform will be built, or both iOs, Android and Web if you select both"
       is_required: true
       value_options:
         - "both"
         - "ios"
         - "android"
+        - "web"
   - is_debug_mode: "false"
     opts:
       title: "Debug mode?"
@@ -151,7 +157,20 @@ inputs:
       title: "[DEPRECATED] App bundle output pattern"	
       summary: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR Deprecated, use `android_output_pattern` instead."
       description: "Pattern to find built AAB artifacts relative to $BITRISE_SOURCE_DIR"
-
+  - web_additional_params: "--release"
+    opts:
+      category: "Web Platform Configs"
+      title: "Additional parameters"
+      summary: "The flags from this input field will be appended to the `flutter build web` command."
+      description: "The flags from this input field will be appended to the `flutter build web` command."
+  - web_output_pattern: "*build/web/*.dart.js"
+    opts:
+      category: "Web Platform Configs"
+      title: "Output pattern"
+      summary: Pattern to find built artifacts relative to $BITRISE\_SOURCE\_DIR
+      description: |-
+        Separate patterns with a newline.
+      is_required: true
 
 outputs:
   - BITRISE_APK_PATH:
